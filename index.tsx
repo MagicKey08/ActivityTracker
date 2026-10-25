@@ -1,9 +1,9 @@
 /*
- * ActivityTracker — kombiniertes Vencord-Plugin
- * Vereint das Voice-/Heatmap-/Timeline-Dashboard (Basis: Elioflex) mit dem
- * Profil- und Typing-Tracking des Ondra-D-Trackers. Logs liegen lokal als
- * Dateien in Vencords Datenordner, nicht in der settings.json. Nichts wird
- * irgendwohin gesendet.
+ * ActivityTracker, a Vencord userplugin
+ * Combines the voice/heatmap/timeline dashboard of Discord-Activity-Tracker
+ * (Elioflex) with the profile and typing tracking of vencord-activity-tracker
+ * (Ondra-D), both GPL-3.0. Logs are stored locally as files in Vencord's data
+ * folder instead of settings.json. Nothing is sent anywhere.
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
@@ -153,7 +153,7 @@ const getRichBody = (user: User, text: string | React.ReactNode) => <div style={
     <span>{text}</span>
 </div>;
 
-/* ---------------- Profil-Snapshots ---------------- */
+/* ---------------- Profile snapshots ---------------- */
 
 function captureSnapshot(user: any): ProfileSnapshot {
     const profile = UserProfileStore?.getUserProfile?.(user.id);
@@ -202,7 +202,7 @@ function profileChangeLabel(field: string): string {
     return labels[field] ?? field;
 }
 
-/* ---------------- Speicherung (Dateien statt settings.json) ---------------- */
+/* ---------------- Storage (files instead of settings.json) ---------------- */
 
 const logsKey = (id: string) => `at-logs-${id}`;
 
@@ -267,7 +267,7 @@ function flushSave() {
 
 function addLog(log: ActivityLog) {
     activityLogs.push(log);
-    // In-Memory-Deckel pro Benutzer, damit die Sitzung nicht unbegrenzt wächst
+    // in-memory cap per user so the session does not grow without limit
     const forUser = activityLogs.filter(l => l.userId === log.userId);
     if (forUser.length > MAX_PER_USER) {
         const drop = forUser[0];
@@ -320,14 +320,14 @@ async function clearAllData() {
 
 async function startTracking(userId: string) {
     trackedUserIds.add(userId);
-    // bereits gespeicherte Historie dieses Users in den Speicher holen
+    // load this user's already stored history into memory
     const existing = await readUserFile(userId);
     if (existing.length) {
         const have = new Set(activityLogs.filter(l => l.userId === userId).map(l => l.timestamp + ":" + l.type));
         for (const l of existing) if (!have.has(l.timestamp + ":" + l.type)) activityLogs.push(l);
         activityLogs.sort((a, b) => a.timestamp - b.timestamp);
     }
-    // Baseline-Snapshot fürs Profil-Tracking anlegen
+    // create a baseline snapshot for profile tracking
     try {
         if (!lastKnownSnapshots.has(userId)) {
             await fetchUserProfile(userId);
@@ -347,18 +347,18 @@ function stopTracking(userId: string) {
 window.addEventListener("beforeunload", flushSave);
 
 const settings = definePluginSettings({
-    logMessages: { type: OptionType.BOOLEAN, description: "Nachrichten der getrackten Leute mitschreiben", default: true },
-    logProfile: { type: OptionType.BOOLEAN, description: "Profiländerungen mitschreiben (Avatar, Banner, Name, Bio, Pronomen, Custom Status)", default: true },
-    logTyping: { type: OptionType.BOOLEAN, description: "Tippen mitschreiben", default: false },
-    notifyStatus: { type: OptionType.BOOLEAN, description: "Benachrichtigung bei Statuswechsel", default: false },
-    notifyVoice: { type: OptionType.BOOLEAN, description: "Benachrichtigung bei Voice-Channel-Wechsel", default: false },
-    notifyProfile: { type: OptionType.BOOLEAN, description: "Benachrichtigung bei Profiländerungen", default: false },
-    notifyTyping: { type: OptionType.BOOLEAN, description: "Benachrichtigung beim Tippen", default: false },
-    persistNotifications: { type: OptionType.BOOLEAN, description: "Benachrichtigungen im Verlauf behalten", default: false },
-    retentionDays: { type: OptionType.NUMBER, description: "Verlauf wie viele Tage aufbewahren (0 = alles behalten)", default: 30 },
-    trackedUsers: { type: OptionType.STRING, description: "intern", default: "", hidden: true },
-    lastStatuses: { type: OptionType.STRING, description: "intern", default: "{}", hidden: true },
-    profileSnapshots: { type: OptionType.STRING, description: "intern", default: "{}", hidden: true }
+    logMessages: { type: OptionType.BOOLEAN, description: "Log messages of tracked users", default: false },
+    logProfile: { type: OptionType.BOOLEAN, description: "Log profile changes (avatar, banner, name, bio, pronouns, custom status)", default: true },
+    logTyping: { type: OptionType.BOOLEAN, description: "Log typing", default: false },
+    notifyStatus: { type: OptionType.BOOLEAN, description: "Notify on status changes", default: false },
+    notifyVoice: { type: OptionType.BOOLEAN, description: "Notify on voice channel changes", default: false },
+    notifyProfile: { type: OptionType.BOOLEAN, description: "Notify on profile changes", default: false },
+    notifyTyping: { type: OptionType.BOOLEAN, description: "Notify on typing", default: false },
+    persistNotifications: { type: OptionType.BOOLEAN, description: "Keep notifications in the notification log", default: false },
+    retentionDays: { type: OptionType.NUMBER, description: "How many days of history to keep (0 = keep everything)", default: 30 },
+    trackedUsers: { type: OptionType.STRING, description: "internal", default: "", hidden: true },
+    lastStatuses: { type: OptionType.STRING, description: "internal", default: "{}", hidden: true },
+    profileSnapshots: { type: OptionType.STRING, description: "internal", default: "{}", hidden: true }
 });
 
 const TYPE_FILTERS: Array<{ id: "all" | ActivityLog["type"]; label: string; icon: string; }> = [
@@ -987,8 +987,8 @@ const UserContextMenuPatch: NavContextMenuPatchCallback = (children, props) => {
 
 export default definePlugin({
     name: "ActivityTracker",
-    description: "Trackt Voice-Zeit, Aktivitäten, Nachrichten, Status, Profiländerungen und Tippen der ausgewählten Nutzer. Dashboard mit Heatmap, Voice-nach-Server und Timeline. Alles lokal.",
-    authors: [{ name: "Kjell", id: 0n }, { name: "Elioflex", id: 0n }, { name: "Ondra_D", id: 534759293065625620n }],
+    description: "Track voice time, activities, messages, status, profile changes and typing of users you choose. Dashboard with heatmap, voice time by server and timeline. Everything stays local.",
+    authors: [{ name: "MagicKey08", id: 1103681094089449565n }, { name: "Elioflex", id: 0n }, { name: "Ondra_D", id: 534759293065625620n }],
     settings,
 
     start() {

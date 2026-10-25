@@ -1,7 +1,7 @@
 /*
  * ActivityTracker — native file storage
- * Speichert die Logs pro Benutzer als JSON-Datei in Vencords Datenordner,
- * statt sie in die settings.json zu quetschen. Nichts verlässt den PC.
+ * Stores the logs per user as JSON files in Vencord's data folder instead of
+ * cramming them into settings.json. Nothing leaves your PC.
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
@@ -21,7 +21,7 @@ async function getLogsDir() {
 }
 
 function fileFor(dir: string, userId: string) {
-    // Nur Ziffern als Dateiname zulassen, damit niemand aus der ID herausnavigieren kann
+    // only allow digits as file name so nobody can navigate out of the folder via the ID
     const safe = String(userId).replace(/[^0-9]/g, "");
     return path.join(dir, `${safe}.json`);
 }
