@@ -14,7 +14,8 @@ import { definePluginSettings, Settings } from "@api/Settings";
 import { fetchUserProfile } from "@utils/discord";
 import definePlugin, { OptionType, PluginNative } from "@utils/types";
 import type { User } from "@vencord/discord-types";
-import { Button, ChannelStore, FluxDispatcher, Forms, GuildStore, Menu, Modal, openModal, PresenceStore, React, TextInput, UserProfileStore, UserStore } from "@webpack/common";
+import { Button } from "@components/Button";
+import { ChannelStore, FluxDispatcher, GuildStore, Menu, Modal, openModal, PresenceStore, React, TextInput, UserProfileStore, UserStore } from "@webpack/common";
 
 const Native = IS_DISCORD_DESKTOP
     ? VencordNative.pluginHelpers.ActivityTracker as PluginNative<typeof import("./native")>
@@ -711,10 +712,10 @@ function WeekHeatmap({ heatmapData, sessions }: { heatmapData: Record<string, nu
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "10px", flexWrap: "wrap", gap: "6px" }}>
                 <div style={{ fontSize: "12px", color: "var(--text-muted)", fontWeight: "700", textTransform: "uppercase", letterSpacing: "0.5px" }}>🌡 Activity Heatmap</div>
                 <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                    {!isCurrentWeek && <Button size={Button.Sizes.MIN} color={Button.Colors.PRIMARY} onClick={() => setWeekOffset(0)}>Today</Button>}
-                    <Button size={Button.Sizes.MIN} color={Button.Colors.PRIMARY} onClick={() => setWeekOffset(o => o + 1)}>◀</Button>
+                    {!isCurrentWeek && <Button size="min" variant="secondary" onClick={() => setWeekOffset(0)}>Today</Button>}
+                    <Button size="min" variant="secondary" onClick={() => setWeekOffset(o => o + 1)}>◀</Button>
                     <span style={{ fontSize: "12px", color: "var(--header-primary)", fontWeight: "700", minWidth: "104px", textAlign: "center" }}>{weekLabel}</span>
-                    <Button size={Button.Sizes.MIN} color={Button.Colors.PRIMARY} disabled={isCurrentWeek} onClick={() => setWeekOffset(o => Math.max(0, o - 1))}>▶</Button>
+                    <Button size="min" variant="secondary" disabled={isCurrentWeek} onClick={() => setWeekOffset(o => Math.max(0, o - 1))}>▶</Button>
                 </div>
             </div>
             <div style={{ display: "grid", gridTemplateColumns: "46px repeat(24, 1fr)", gap: "2px" }}>
@@ -834,7 +835,7 @@ function UserProfile({ userId, logs }: { userId: string; logs: ActivityLog[]; })
                         {mainActivity && <span style={{ fontSize: "12px", color: "var(--text-normal)", marginLeft: "2px" }}>— {mainActivity.name}{mainActivity.details ? `: ${mainActivity.details}` : ""}</span>}
                     </div>
                 </div>
-                <Button size={Button.Sizes.SMALL} color={isTracked ? Button.Colors.RED : Button.Colors.GREEN}
+                <Button size="small" variant={isTracked ? "dangerPrimary" : "positive"}
                     onClick={() => { if (isTracked) stopTracking(userId); else void startTracking(userId).then(force); force(); }}>
                     {isTracked ? "⏹ Stop" : "▶ Track"}
                 </Button>
@@ -856,7 +857,7 @@ function UserProfile({ userId, logs }: { userId: string; logs: ActivityLog[]; })
                 <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "8px", flexWrap: "wrap" }}>
                     <span style={{ fontSize: "12px", color: "var(--text-muted)", fontWeight: "700", textTransform: "uppercase", letterSpacing: "0.5px" }}>📜 Timeline ({visibleLogs.length})</span>
                     <div style={{ display: "flex", gap: "4px", marginLeft: "auto", flexWrap: "wrap" }}>
-                        {TYPE_FILTERS.map(f => <Button key={f.id} size={Button.Sizes.MIN} color={typeFilter === f.id ? Button.Colors.BRAND : Button.Colors.PRIMARY} onClick={() => setTypeFilter(f.id)}>{f.icon} {f.label}</Button>)}
+                        {TYPE_FILTERS.map(f => <Button key={f.id} size="min" variant={typeFilter === f.id ? "primary" : "secondary"} onClick={() => setTypeFilter(f.id)}>{f.icon} {f.label}</Button>)}
                     </div>
                 </div>
                 {visibleLogs.length === 0 ? (
@@ -895,12 +896,12 @@ function ActivityDashboard({ modalProps }: { modalProps: any; }) {
     const header = (
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", paddingRight: "40px", paddingBottom: "12px", borderBottom: "1px solid var(--background-modifier-accent)" }}>
             <div>
-                <Forms.FormTitle tag="h2" style={{ margin: 0, display: "flex", alignItems: "center", gap: "8px" }}><ActivityLogo size={26} /> Activity Tracker</Forms.FormTitle>
+                <div style={{ margin: 0, display: "flex", alignItems: "center", gap: "8px", fontSize: "20px", fontWeight: 700, color: "var(--header-primary)" }}><ActivityLogo size={26} /> Activity Tracker</div>
                 <div style={{ fontSize: "12px", color: "var(--text-muted)", marginTop: "4px", fontWeight: "500" }}>{activityLogs.length} total logs • {trackedUserIds.size} tracked users</div>
             </div>
             <div style={{ display: "flex", gap: "6px" }}>
-                <Button size={Button.Sizes.SMALL} color={Button.Colors.PRIMARY} onClick={() => exportJSON(activityLogs)}>⬇ Export</Button>
-                <Button size={Button.Sizes.SMALL} color={Button.Colors.RED} onClick={() => { void clearAllData(); setSelectedUserId(null); }}>🗑 Clear all</Button>
+                <Button size="small" variant="secondary" onClick={() => exportJSON(activityLogs)}>⬇ Export</Button>
+                <Button size="small" variant="dangerPrimary" onClick={() => { void clearAllData(); setSelectedUserId(null); }}>🗑 Clear all</Button>
             </div>
         </div>
     );
@@ -932,7 +933,7 @@ function ActivityDashboard({ modalProps }: { modalProps: any; }) {
     };
 
     return (
-        <Modal {...modalProps} size="dynamic" title={header} footer={<Button color={Button.Colors.BRAND} onClick={modalProps.onClose}>Close</Button>}>
+        <Modal {...modalProps} size="dynamic" title={header} footer={<Button variant="primary" onClick={modalProps.onClose}>Close</Button>}>
             <div style={{ display: "flex", height: "600px", background: "var(--background-primary)" }}>
                 <div style={{ width: "220px", minWidth: "220px", borderRight: "1px solid var(--background-modifier-accent)", display: "flex", flexDirection: "column" }}>
                     <div style={{ padding: "12px", borderBottom: "1px solid var(--background-modifier-accent)" }}>
